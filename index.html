@@ -1,0 +1,51 @@
+import tkinter as tk
+from datetime import datetime, timedelta
+
+class DailyTimeTracker(tk.Tk):
+    def __init__(self):
+        super().__init__()
+        self.title("Daily Time Tracker")
+        self.geometry("300x400")
+        self.configure(bg="black")
+        
+        self.time_label = tk.Label(self, font=("Arial", 20), fg="white", bg="black")
+        self.time_label.pack(anchor="ne", padx=10, pady=10)
+        
+        self.token_label = tk.Label(self, font=("Arial", 60), fg="white", bg="black")
+        self.token_label.pack(expand=True)
+        
+        self.canvas = tk.Canvas(self, width=200, height=30, bg="black", highlightthickness=0)
+        self.canvas.pack()
+        
+        self.percentage_label = tk.Label(self, font=("Arial", 14), fg="red", bg="black")
+        self.percentage_label.place(relx=0.5, rely=0.65, anchor="center")
+        
+        self.update_display()
+
+    def update_display(self):
+        now = datetime.now()
+        midnight = now.replace(hour=0, minute=0, second=0, microsecond=0)
+        seconds_passed = (now - midnight).total_seconds()
+        seconds_in_day = 24 * 60 * 60
+        
+        percentage_remaining = (seconds_in_day - seconds_passed) / seconds_in_day
+        tokens_remaining = int(1440 * percentage_remaining)  # 1440 minutes in a day
+        
+        self.time_label.config(text=now.strftime("%H:%M"))
+        self.token_label.config(text=str(tokens_remaining))
+        
+        self.canvas.delete("all")
+        width = 200
+        height = 30
+        used_width = width * (1 - percentage_remaining)
+        self.canvas.create_rectangle(0, 0, used_width, height, fill="red", outline="")
+        self.canvas.create_rectangle(used_width, 0, width, height, fill="gray", outline="")
+        
+        percentage_text = f"{percentage_remaining:.0%}"
+        self.percentage_label.config(text=percentage_text)
+        
+        self.after(1000, self.update_display)  # Update every second
+
+if __name__ == "__main__":
+    app = DailyTimeTracker()
+    app.mainloop()
